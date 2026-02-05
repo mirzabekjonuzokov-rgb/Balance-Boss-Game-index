@@ -3,226 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Preposition Quest: Study Edition</title>
+    <title>Tourism Final Exam - Multi-Page</title>
     <style>
         :root {
-            --primary: #4a90e2; --beginner: #2ecc71; --amateur: #f1c40f;
-            --pro: #e67e22; --dark: #2c3e50; --light: #f4f7f6;
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --success: #27ae60;
+            --bg: #f4f7f6;
         }
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            color: var(--dark); display: flex; justify-content: center;
-            align-items: center; min-height: 100vh; margin: 0;
-        }
-        .container {
-            background: white; padding: 2.5rem; border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4); max-width: 800px;
-            width: 95%; text-align: center; max-height: 90vh; overflow-y: auto;
-        }
-        .screen { display: none; }
-        .active { display: block; }
-        .btn {
-            display: block; width: 100%; padding: 15px; margin: 10px 0;
-            border: none; border-radius: 10px; color: white;
-            font-weight: bold; cursor: pointer; font-size: 1.1rem; transition: 0.2s;
-        }
-        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
-        .bg-beginner { background: var(--beginner); }
-        .bg-amateur { background: var(--amateur); color: #333; }
-        .bg-pro { background: var(--pro); }
-        .bg-main { background: var(--primary); }
-        .bg-review { background: #9b59b6; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .exam-container { width: 90%; max-width: 600px; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: relative; }
+        header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .progress-bar { height: 8px; background: #eee; border-radius: 4px; margin-bottom: 20px; overflow: hidden; }
+        #progress-fill { height: 100%; background: var(--accent); width: 0%; transition: 0.3s; }
         
-        .options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        .prep-btn {
-            padding: 20px; border: 2px solid var(--primary);
-            background: white; border-radius: 10px; cursor: pointer; font-weight: bold;
-        }
-        .prep-btn:hover { background: var(--primary); color: white; }
+        .question-page { display: none; }
+        .question-page.active { display: block; animation: fadeIn 0.4s; }
         
-        .rule-summary {
-            background: #f8f9fa; border-left: 5px solid var(--primary);
-            padding: 15px; text-align: left; margin: 20px 0; font-size: 0.9rem;
-        }
-        .review-item { text-align: left; padding: 15px; border-bottom: 1px solid #eee; }
-        .correct { color: #27ae60; font-weight: bold; }
-        .incorrect { color: #c0392b; font-weight: bold; }
-        input[type="text"] { padding: 12px; width: 80%; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 20px; }
+        .question-text { font-size: 1.2em; font-weight: 600; color: var(--primary); margin-bottom: 20px; line-height: 1.4; }
+        .options-list { list-style: none; padding: 0; }
+        .option-item { margin-bottom: 10px; }
+        
+        label { display: block; padding: 15px; border: 2px solid #edf2f7; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+        label:hover { border-color: var(--accent); background: #f0f9ff; }
+        input[type="radio"] { margin-right: 15px; transform: scale(1.2); }
+        input[type="radio"]:checked + span { font-weight: bold; color: var(--accent); }
+        
+        .controls { margin-top: 30px; display: flex; justify-content: space-between; }
+        button { padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; }
+        #next-btn { background: var(--accent); color: white; }
+        #next-btn:hover { background: #2980b9; }
+        #prev-btn { background: #bdc3c7; color: white; }
+        #prev-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        #result-page { text-align: center; display: none; }
+        .score-circle { width: 150px; height: 150px; border-radius: 50%; border: 10px solid var(--success); display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 20px auto; font-size: 2em; font-weight: bold; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<div id="login-screen" class="container screen active">
-    <h1>🏆 Preposition Quest</h1>
-    <p>Practice <strong>In, On, At</strong> with Destination B1 Rules.</p>
-    <input type="text" id="player-name" placeholder="Enter Student Name...">
-    <button class="btn bg-main" onclick="startLevelSelection()">Login</button>
-</div>
+<div class="exam-container">
+    <header>
+        <div id="quiz-info">Question <span id="current-idx">1</span> of <span id="total-idx">...</span></div>
+        <div class="progress-bar"><div id="progress-fill"></div></div>
+    </header>
 
-<div id="level-screen" class="container screen">
-    <h2 id="welcome-msg"></h2>
-    <div class="rule-summary">
-        <strong>💡 Quick Mind Map:</strong><br>
-        🔼 <strong>IN:</strong> Big/General (Years, Countries, Rooms)<br>
-        ⏏️ <strong>ON:</strong> Specific/Surface (Days, Streets, Islands)<br>
-        🔽 <strong>AT:</strong> Precise/Point (Clock times, Addresses, Activities)
+    <form id="quizForm">
+        <div id="question-container"></div>
+
+        <div class="controls">
+            <button type="button" id="prev-btn" onclick="changeQuestion(-1)" disabled>Previous</button>
+            <button type="button" id="next-btn" onclick="changeQuestion(1)">Next</button>
+        </div>
+    </form>
+
+    <div id="result-page">
+        <h2>Exam Complete!</h2>
+        <div class="score-circle">
+            <span id="final-score">0</span>
+            <small style="font-size: 0.4em; color: #7f8c8d;">TOTAL SCORE</small>
+        </div>
+        <p id="score-msg"></p>
+        <button onclick="location.reload()" style="background: var(--primary); color: white;">Restart Exam</button>
     </div>
-    <button class="btn bg-beginner" onclick="startGame('beginner')">Level 1: Beginner Mix</button>
-    <button class="btn bg-amateur" onclick="startGame('amateur')">Level 2: Amateur Mix</button>
-    <button class="btn bg-pro" onclick="startGame('pro')">Level 3: Pro Mix</button>
-    <button class="btn bg-review" onclick="finishSession()" style="margin-top:20px;">🔚 End & Review All</button>
-</div>
-
-<div id="game-screen" class="container screen">
-    <h3 id="current-level-tag"></h3>
-    <div id="question-box" style="font-size: 1.4rem; margin: 30px 0;"></div>
-    <div class="options">
-        <button class="prep-btn" onclick="handleGuess('in')">IN</button>
-        <button class="prep-btn" onclick="handleGuess('on')">ON</button>
-        <button class="prep-btn" onclick="handleGuess('at')">AT</button>
-    </div>
-    <div id="feedback" style="margin-top: 20px; font-weight: bold; height: 40px;"></div>
-</div>
-
-<div id="round-result-screen" class="container screen">
-    <h2>Level Complete!</h2>
-    <p id="round-score-text" style="font-size: 1.5rem;"></p>
-    <button class="btn bg-main" onclick="showScreen('level-screen')">Back to Map</button>
-</div>
-
-<div id="final-screen" class="container screen">
-    <h1>Final Scoreboard</h1>
-    <h2 id="final-player-name"></h2>
-    <div style="font-size: 4rem; color: var(--primary);" id="final-total">0</div>
-    <div id="review-area"></div>
-    <button class="btn bg-main" onclick="location.reload()">New Session</button>
 </div>
 
 <script>
-    let playerName = "", sessionScore = 0, currentQuestions = [], questionIndex = 0, roundScore = 0;
-    let allSessionLog = [];
+    const questions = [
+        { q: "Your mother’s brother is your ____________.", a: ["nephew", "uncle", "son-in-law", "grandfather"], c: 1 },
+        { q: "Your son’s wife is your ____________.", a: ["niece", "aunt", "daughter-in-law", "mother-in-law"], c: 2 },
+        { q: "Your uncle’s son is your ____________.", a: ["nephew", "colleague", "son-in-law", "cousin"], c: 3 },
+        { q: "What kind of music ____________?", a: ["is she like", "likes she", "does she like", "do she like"], c: 2 },
+        { q: "What time _____________?", a: ["were they arrived", "they arrived", "did they arrive", "did they arrived"], c: 2 },
+        { q: "What ____________ to do this afternoon?", a: ["does she want", "do she wants", "is she want", "does she wants"], c: 0 },
+        { q: "How many students ___________ in your class last year?", a: ["were there", "did there", "had there", "are there"], c: 0 },
+        { q: "Could you ________ me directions to the nearest bank, please?", a: ["answer", "say", "give", "speak"], c: 2 },
+        { q: "I have several friends who live _________.", a: ["abroad", "outside", "foreign", "inside"], c: 0 },
+        { q: "I’m very interested ____________ about your dinner party last night.", a: ["in hearing", "to hear", "to hearing", "hearing"], c: 0 },
+        { q: "I’m ____________ seeing her again soon.", a: ["looking forward to", "planning to", "interested to", "look forward to"], c: 0 },
+        { q: "I’ve lost my camping-gas ____________.", a: ["light", "spray", "stove", "kit"], c: 2 },
+        { q: "Have you seen my first-aid ____________ anywhere?", a: ["kit", "pack", "bag", "baggage"], c: 0 },
+        { q: "The journey will take two or three days ____________.", a: ["on foot", "by walking", "with feet", "in foot"], c: 0 },
+        { q: "I hope to see the castle ____________ before I leave the city.", a: ["ancient", "remains", "ruins", "rests"], c: 2 },
+        { q: "Did you know that Peter used to work _________ a chauffeur?", a: ["like", "at", "as", "of"], c: 2 },
+        { q: "My father used to earn _________ in a travelling circus!", a: ["a life", "a living", "a salary", "wage"], c: 1 },
+        { q: "I’m hoping to get a _________ later this year.", a: ["pay rise", "pay raise", "well-paid", "promoted"], c: 0 },
+        { q: "I’m hoping to _________ later this year.", a: ["get promoted", "get promotion", "have promoted", "got promoted"], c: 0 },
+        { q: "I had several _________ before I became a social worker.", a: ["careers", "works", "jobs", "job"], c: 2 },
+        { q: "Are you connected __________ the internet?", a: ["on", "to", "at", "of"], c: 1 },
+        { q: "Would you like to pay ____ cash, or ____ credit card?", a: ["by / in", "in / by", "with / with", "by/by"], c: 1 },
+        { q: "Did Kate Winslet _________ a good speech when she won her Oscar?", a: ["have", "say", "make", "tell"], c: 2 },
+        { q: "Is your son named _________________ your father?", a: ["after", "with", "by", "out of"], c: 0 },
+        { q: "Exactly when did Fred get _________ financial difficulties?", a: ["into", "onto", "out", "with"], c: 0 },
+        { q: "How does Tim _________ with his stressful job?", a: ["suffer", "deal", "over-work", "after"], c: 1 },
+        { q: "Have you ever agreed to _________ somebody else’s pet?", a: ["look after", "care about", "take care", "look like"], c: 0 },
+        { q: "Does anybody here speak __________?", a: ["Turkish", "Turkese", "Turk", "Turking"], c: 0 },
+        { q: "I met a great _________ man when I was on holiday.", a: ["Portuguese", "Portugal", "Portugan", "Portugalian"], c: 0 },
+        { q: "What’s the world’s most __________ language?", a: ["widely talked", "wide-spoken", "widely-spoken", "widely-speaking"], c: 2 },
+        { q: "He’s got a really __________ French accent.", a: ["big", "strong", "loud", "high"], c: 1 },
+        { q: "Everyone wore __________ at the carnival!", a: ["floats", "bands", "masks", "belts"], c: 2 },
+        { q: "My computer has got a __________.", a: ["virus", "clone", "junk mail", "mouth"], c: 0 },
+        { q: "Are __________ in your country interested in global issues?", a: ["politics", "politicians", "politicals", "policies"], c: 1 },
+        { q: "Do you go ____________ often?", a: ["foreign", "abroad", "tourist", "travel"], c: 1 },
+        { q: "What examinations do people ____________ in your country?", a: ["make", "take", "pass", "get"], c: 1 },
+        { q: "I went to the ____________ to borrow a couple of books.", a: ["bookshop", "library", "reunion", "duty-free"], c: 1 },
+        { q: "I don’t have a lot ______ common with my neighbours.", a: ["on", "with", "in", "to"], c: 2 },
+        { q: "I get ______ really well with my mother-in-law.", a: ["through", "on", "in", "to"], c: 1 },
+        { q: "There’s only __________ housework for you to do.", a: ["a little", "not much", "a few", "many"], c: 0 },
+        { q: "__________ pollution in this city comes from traffic.", a: ["Some of", "Many", "Most of the", "None"], c: 2 },
+        { q: "Do you have __________ water in that bottle?", a: ["many", "any", "some", "none"], c: 1 },
+        { q: "How many different jobs ________ in your life?", a: ["do you have", "have you had", "did you have", "do you had"], c: 1 },
+        { q: "Have you read your horoscope ________?", a: ["yet", "already", "still", "for"], c: 0 },
+        { q: "The best concert ________ to was Justin Timberlake’s.", a: ["I’ve ever written", "I’ve ever been", "I saw", "I went"], c: 1 },
+        { q: "Harry ________ with us on holiday this year.", a: ["is coming probably", "is going to probably come", "will probably come", "has probably coming"], c: 2 },
+        { q: "We’ll leave for school after ________.", a: ["Barry arrives", "Barry will arrive", "Barry is arriving", "Barry will arriving"], c: 0 },
+        { q: "I was responsible ________ the coffee machine.", a: ["for to clean", "for clean", "for cleaning", "to cleaning"], c: 2 },
+        { q: "I met someone _________ could speak seven languages.", a: ["which", "who", "they", "whose"], c: 1 },
+        { q: "You _________ leave your pet dog locked in a hot car.", a: ["mustn’t", "don’t have to", "couldn’t", "can"], c: 0 },
+        { q: "When I was young, I _________ wear a school uniform.", a: ["mustn’t", "didn’t have to", "can’t", "must"], c: 1 },
+        { q: "Document needed before boarding your flight?", a: ["Driver's license", "Library card", "Passport/Boarding pass", "Grocery list"], c: 2 },
+        { q: "Where do you check in your luggage?", a: ["Security", "Gate", "Airline counter", "Carousel"], c: 2 },
+        { q: "What should you do before security?", a: ["Shoes on", "Remove laptop/liquids", "Eat meal", "Take nap"], c: 1 },
+        { q: "Area where you wait for your flight?", a: ["Departure hall", "Arrival lounge", "Carousel", "Taxi rank"], c: 0 },
+        { q: "Where do you collect luggage after flight?", a: ["Gate", "Check-in", "Baggage carousel", "Security"], c: 2 },
+        { q: "Purpose of a boarding pass?", a: ["Seat assignment", "Flight details", "Access to secure area", "All of the above"], c: 3 },
+        { q: "Could you please _______ me a cup of tea?", a: ["bring", "take", "get", "fetch"], c: 0 },
+        { q: "_______ I use your phone?", a: ["Shall", "Do", "Can", "Ought"], c: 2 },
+        { q: "_______ you open the window, please?", a: ["Would", "Could", "Should", "Must"], c: 1 },
+        { q: "_______ you tell me where the airport is?", a: ["can", "are", "do", "have"], c: 0 },
+        { q: "_______ you help me find the train station?", a: ["Should", "Would", "Could", "Must"], c: 2 },
+        { q: "_______ you pass me the salt, please?", a: ["Do", "Can", "Will", "May"], c: 1 },
+        { q: "_______ you close the door?", a: ["Would", "Should", "May", "Can"], c: 3 },
+        { q: "_______ you please speak a little slower?", a: ["Will", "Do", "Could", "Can"], c: 2 },
+        { q: "There aren't ______ apples left.", a: ["some", "any", "much", "many"], c: 1 },
+        { q: "Would you like ______ tea?", a: ["some", "any", "no", "much"], c: 0 },
+        { q: "I don't have ______ money to lend you.", a: ["some", "any", "no", "many"], c: 1 },
+        { q: "We saw ______ interesting birds.", a: ["no", "much", "some", "Any"], c: 2 },
+        { q: "How ______ sugar do you need?", a: ["many", "much", "some", "any"], c: 1 },
+        { q: "They _______ finished their homework.", a: ["have yet", "have already", "haven't yet", "haven't already"], c: 1 },
+        { q: "Has she called her mother _______?", a: ["yet", "already", "since", "for"], c: 0 },
+        { q: "He _______ seen that movie three times!", a: ["has yet", "has already", "hasn't yet", "hasn't already"], c: 1 },
+        { q: "Everything is ready! We _______ packed our bags.", a: ["have yet", "have already", "haven't yet", "haven't already"], c: 1 },
+        { q: "She's already at the office. She _______ left.", a: ["has yet", "has already", "hasn't yet", "hasn't already"], c: 1 },
+        { q: "They _______ decided _______.", a: ["haven't /yet", "have / already", "have / yet", "haven't / already"], c: 0 },
+        { q: "I _______ finished reading the book.", a: ["have yet", "have already", "haven't yet", "haven't already"], c: 1 },
+        { q: "Holiday type involving a large ship?", a: ["camping", "backpacking", "cruise", "city break"], c: 2 },
+        { q: "A short trip to a city for sightseeing?", a: ["package holiday", "camping trip", "city break", "adventure holiday"], c: 2 },
+        { q: "Focuses on hiking or climbing?", a: ["resort holiday", "adventure holiday", "relaxation", "cultural holiday"], c: 1 },
+        { q: "Learning about history and sites?", a: ["relaxation holiday", "adventure holiday", "history trails", "staycation"], c: 2 },
+        { q: "Which of these is an uncountable noun?", a: ["apples", "water", "cars", "books"], c: 1 },
+        { q: "There isn't _______ milk left.", a: ["many", "much", "some", "no"], c: 1 },
+        { q: "How _______ bread do you want?", a: ["many", "much", "some", "any"], c: 1 },
+        { q: "There are _________ cars in the parking lot.", a: ["much", "many", "little", "a lot"], c: 1 },
+        { q: "I don't have _______ time.", a: ["many", "much", "some", "any"], c: 1 },
+        { q: "He bought _______ new shoes.", a: ["a", "an", "some", "a lot"], c: 2 },
+        { q: "Is there _______ sugar in the bowl?", a: ["many", "much", "some", "few"], c: 1 },
+        { q: "We don't have _______ info about the incident.", a: ["many", "much", "some", "a lot of"], c: 1 },
+        { q: "Machu Picchu is located in?", a: ["Mexico", "Peru", "Colombia", "Brazil"], c: 1 },
+        { q: "Who built Machu Picchu?", a: ["Aztecs", "Mayans", "Incas", "Olmecs"], c: 2 },
+        { q: "Machu Picchu reach method?", a: ["car", "walk", "train or foot", "helicopter"], c: 2 },
+        { q: "Madonna hated her _________, but needed a __________.", a: ["work/job", "works/jobs", "career/job", "work/work"], c: 0 },
+        { q: "Tom Cruise was responsible _________ cleaning.", a: ["on", "with", "for", "out"], c: 2 },
+        { q: "Money from govt when out of work?", a: ["application", "unemployed benefit", "cheque", "promotion"], c: 1 },
+        { q: "Michelle was fired ________ her job.", a: ["from", "out of", "for", "as"], c: 0 }
+    ];
 
-    const database = {
-        beginner: [
-            { q: "Paris is wonderful ____ April.", a: "in", h: "Months (General Time)" },
-            { q: "The movie starts ____ 7:00.", a: "at", h: "Clock times (Precise Time)" },
-            { q: "I'll be home ____ Sunday.", a: "on", h: "Days (Specific Time)" },
-            { q: "I first went to Russia ____ 2005.", a: "in", h: "Years (General Time)" },
-            { q: "The apple was ____ the table.", a: "on", h: "Surfaces (Specific Place)" },
-            { q: "Let's meet ____ the park.", a: "in", h: "Enclosed areas (General Place)" },
-            { q: "Tim was waiting ____ the car.", a: "in", h: "Enclosed space" },
-            { q: "Meet me ____ the entrance.", a: "at", h: "Specific point (Precise Place)" },
-            { q: "Head to the theater ____ Second Street.", a: "on", h: "Street names" },
-            { q: "Your passport is ____ the drawer.", a: "in", h: "Inside an object" },
-            { q: "I'll see you ____ the morning.", a: "in", h: "Parts of day" },
-            { q: "We often go skiing ____ winter.", a: "in", h: "Seasons" },
-            { q: "My office is ____ Main Street.", a: "on", h: "Road/Street locations" },
-            { q: "The birds sing ____ sunrise.", a: "at", h: "Specific time point" },
-            { q: "Sharon is ____ the travel agent's.", a: "in", h: "Inside a building" }
-        ],
-        amateur: [
-            { q: "My birthday is ____ 19th March.", a: "on", h: "Specific Dates" },
-            { q: "We're flying ____ Tuesday morning.", a: "on", h: "Specific day + part of day" },
-            { q: "Last year, we stayed ____ Mykonos.", a: "on", h: "Islands (Special Rule)" },
-            { q: "What's life like ____ the desert?", a: "in", h: "Large areas/regions" },
-            { q: "I'll meet you ____ the bus stop.", a: "at", h: "Point on a journey" },
-            { q: "There are Italian phrases ____ page 97.", a: "on", h: "Pages (Special Rule)" },
-            { q: "I have a lot of fun ____ my birthday.", a: "on", h: "Specific holidays/events" },
-            { q: "I am ____ the middle of my work.", a: "in", h: "Phrase: in the middle of" },
-            { q: "Turn ____ the left at the light.", a: "on", h: "Direction phrases" },
-            { q: "Meet me ____ the first floor.", a: "on", h: "Floor levels" },
-            { q: "What are you doing ____ Christmas?", a: "at", h: "Holiday periods (Duration)" },
-            { q: "I am very busy ____ the moment.", a: "at", h: "Phrase: at the moment" },
-            { q: "I've left the tickets ____ the living room.", a: "in", h: "Rooms" },
-            { q: "I can't see well ____ night.", a: "at", h: "Phrase: at night" },
-            { q: "The tickets are ____ the counter.", a: "on", h: "Surfaces" }
-        ],
-        pro: [
-            { q: "My cousin lives ____ 132 London Road.", a: "at", h: "Specific address (Number + Street)" },
-            { q: "John is ____ the cinema.", a: "at", h: "Buildings (Focus on activity)" },
-            { q: "Rania isn't here. She's ____ a party.", a: "at", h: "Specific Activities" },
-            { q: "I should be home ____ a week or two.", a: "in", h: "Unspecific time span" },
-            { q: "Look ____ the bottom of the page.", a: "at", h: "Relative positions" },
-            { q: "Who is standing ____ the door?", a: "at", h: "Precise point" },
-            { q: "We're spending our holiday ____ the countryside.", a: "in", h: "Large areas all around us" },
-            { q: "There's a bus ____ ten past three.", a: "at", h: "Exact Clock times" },
-            { q: "What's it like ____ the North Pole?", a: "at", h: "Exact places" },
-            { q: "Snow falls ____ Christmas time.", a: "at", h: "Holiday periods" },
-            { q: "Put the stamp ____ the top-right corner.", a: "in", h: "Inside a corner area" },
-            { q: "Wait ____ the entrance until I arrive.", a: "at", h: "Target point" },
-            { q: "Is there anything good ____ television tonight?", a: "on", h: "Media/Screens" },
-            { q: "I'll be ready ____ an hour.", a: "in", h: "Future time phrase" },
-            { q: "The kids are playing ____ the beach.", a: "on", h: "Phrase: on the beach" }
-        ]
-    };
-
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        if(id === 'level-screen') document.getElementById('session-total').innerText = sessionScore;
-    }
-
-    function startLevelSelection() {
-        playerName = document.getElementById('player-name').value || "Student";
-        document.getElementById('welcome-msg').innerText = `Greetings, ${playerName}!`;
-        showScreen('level-screen');
-    }
-
-    function startGame(level) {
-        currentQuestions = [...database[level]].sort(() => Math.random() - 0.5);
-        questionIndex = 0; roundScore = 0;
-        document.getElementById('current-level-tag').innerText = `Difficulty: ${level.toUpperCase()}`;
-        showScreen('game-screen');
-        nextQuestion();
-    }
-
-    function nextQuestion() {
-        if (questionIndex < currentQuestions.length) {
-            const q = currentQuestions[questionIndex];
-            document.getElementById('question-box').innerHTML = q.q.replace("____", "<span style='color:var(--primary); text-decoration: underline'>____</span>");
-            document.getElementById('feedback').innerText = "";
-        } else {
-            sessionScore += roundScore;
-            document.getElementById('round-score-text').innerText = `Level Score: ${roundScore} / ${currentQuestions.length}`;
-            showScreen('round-result-screen');
-        }
-    }
-
-    function handleGuess(choice) {
-        const q = currentQuestions[questionIndex];
-        const isCorrect = (choice === q.a);
-        allSessionLog.push({ q: q.q, user: choice, correct: q.a, rule: q.h, status: isCorrect });
-
-        const feedback = document.getElementById('feedback');
-        if (isCorrect) {
-            roundScore++; feedback.style.color = "green";
-            feedback.innerText = "Correct! ✨";
-        } else {
-            feedback.style.color = "red";
-            feedback.innerText = `Incorrect. The answer was ${q.a.toUpperCase()}.`;
-        }
-        setTimeout(() => { questionIndex++; nextQuestion(); }, 1200);
-    }
-
-    function finishSession() {
-        document.getElementById('final-player-name').innerText = playerName;
-        document.getElementById('final-total').innerText = sessionScore;
-        const reviewArea = document.getElementById('review-area');
-        reviewArea.innerHTML = "<h3>Review Your Answers:</h3>";
+    let currentQ = 0;
+    const container = document.getElementById('question-container');
+    
+    // Build HTML for all questions
+    questions.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = `question-page ${index === 0 ? 'active' : ''}`;
+        div.id = `q-page-${index}`;
         
-        allSessionLog.forEach(item => {
-            const div = document.createElement('div');
-            div.className = "review-item";
-            div.innerHTML = `
-                <div><strong>${item.q.replace("____", item.user.toUpperCase())}</strong></div>
-                <div class="${item.status ? 'correct' : 'incorrect'}">${item.status ? '✓ Correct' : '✗ Incorrect (Correct: ' + item.correct.toUpperCase() + ')'}</div>
-                <div style="font-size:0.8rem; color:#666 italic">B1 Rule: ${item.rule}</div>
-            `;
-            reviewArea.appendChild(div);
+        let optionsHtml = '';
+        item.a.forEach((opt, i) => {
+            optionsHtml += `
+                <div class="option-item">
+                    <label>
+                        <input type="radio" name="q${index}" value="${i === item.c ? 1 : 0}">
+                        <span>${opt}</span>
+                    </label>
+                </div>`;
         });
-        showScreen('final-screen');
+
+        div.innerHTML = `<div class="question-text">${index + 1}. ${item.q}</div><div class="options-list">${optionsHtml}</div>`;
+        container.appendChild(div);
+    });
+
+    document.getElementById('total-idx').innerText = questions.length;
+
+    function changeQuestion(step) {
+        const pages = document.querySelectorAll('.question-page');
+        
+        // Final Page logic
+        if (currentQ === questions.length - 1 && step === 1) {
+            showResults();
+            return;
+        }
+
+        pages[currentQ].classList.remove('active');
+        currentQ += step;
+        pages[currentQ].classList.add('active');
+
+        // Update UI
+        document.getElementById('current-idx').innerText = currentQ + 1;
+        document.getElementById('prev-btn').disabled = currentQ === 0;
+        document.getElementById('next-btn').innerText = currentQ === questions.length - 1 ? "Finish" : "Next";
+        
+        const progress = ((currentQ + 1) / questions.length) * 100;
+        document.getElementById('progress-fill').style.width = progress + '%';
+    }
+
+    function showResults() {
+        const formData = new FormData(document.getElementById('quizForm'));
+        let score = 0;
+        for (let value of formData.values()) { score += parseInt(value); }
+
+        document.getElementById('quizForm').style.display = 'none';
+        document.getElementById('quiz-info').style.display = 'none';
+        document.getElementById('result-page').style.display = 'block';
+        document.getElementById('final-score').innerText = score;
+        
+        const percent = (score / questions.length) * 100;
+        document.getElementById('score-msg').innerText = percent >= 60 ? "Great job! You passed." : "Keep studying and try again!";
     }
 </script>
+
 </body>
 </html>
